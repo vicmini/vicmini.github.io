@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title><![CDATA[如何配置github的SSH连接以及远程服务器的免密登陆]]></title>
+    <url>%2F2018%2F09%2F04%2F%E5%A6%82%E4%BD%95%E9%85%8D%E7%BD%AEgithub%E7%9A%84SSH%E8%BF%9E%E6%8E%A5%E4%BB%A5%E5%8F%8A%E8%BF%9C%E7%A8%8B%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E5%85%8D%E5%AF%86%E7%99%BB%E9%99%86%2F</url>
+    <content type="text"><![CDATA[前言 通常我们在github上提交代码，或者登陆远程服务器时，经常提示我们需要输入账户和密码，这的确是一件非常烦人的事情。本文以mac为例，介绍如何通过ssh登陆远程服务器。 通过ssh连接github秘钥对的生成12345cd ~/.ssh #进入当前用户的.ssh文件夹，没有则创建ssh-keygen -t rsa -C "username或email" -f "username_rsa"# -t 表示选用那种加密算法，一般选择 rsa即可# -C 表示这对秘钥的归属者 username或email可以自己随意填写# -f 表示生成的秘钥的文件名 为了方便识别，建议以 _rsa结尾，username可以随意填写 执行以上命令后,会在.ssh文件夹下生成一对秘钥对，其中username_rsa为私钥，username_rsa.pub为公钥 修改私钥文件的访问权限1chmod 600 username_rsa # 修改私钥文件的访问权限为600 将ssh key 添加到ssh-agent 确认ssh-agent是可用的 12eval $(ssh-agent -s)# 输出 Agent pid XXXX 将ssh key 添加到shh-agent 1ssh-add username_rsa 编写配置文件 在 .ssh 文件下创建config文件 在config文件下输入如下内容 123456789Host vicmini #host别名，可以任意填写HostName github.com User gitIdentityFile /Users/victor/.ssh/vicmini_rsa #私钥所在路径Protocol 2Compression yesServerAliveInterval 60ServerAliveCountMax 20LogLevel INFO 编写保存后，将配置文件的访问权限修改为644 1chmod 644 config 上传公钥至github1pbcopy &lt; ~/.ssh/username.rsa.pub #复制公钥内容至剪切板 登陆GitHub -&gt; settings -&gt; SSH adn GPG keys -&gt;New SSH key将复制的私钥内容粘贴至Key中，Title可任意填写 测试配置是否成功12ssh -T git@github.com# Warning: Permanently added the RSA host key for IP address '13.250.177.223' to the list of known hosts. 至此配置成功 免密登陆远程服务器前4步同上常用的config文件配置模板12345678910111213141516171819202122232425262728293031323334353637383940414243# 这里定义了三个服务器Host gateway-produceHostName 101.200.*.*Port 54322Host node-produceHostName 101.200.*.*Port 22Host java-produceHostName 101.200.*.*Port 22#这里给以上的服务器配置同一个私钥Host *-produceUser rootIdentityFile ~/.ssh/produce_key_rsaProtocol 2Compression yesServerAliveInterval 60ServerAliveCountMax 20LogLevel INFO#以上是一对密钥，用在多个服务器上####################Host evil-cloudUser rootHostName 47.95.*.*IdentityFile ~/.ssh/username_rsaProtocol 2Compression yesServerAliveInterval 60ServerAliveCountMax 20LogLevel INFOHost git.yideng.siteUser gitIdentityFile ~/.ssh/username_rsaProtocol 2Compression yesServerAliveInterval 60ServerAliveCountMax 20LogLevel INFO 上传公钥至远程服务器123# 上传公钥到服务器对应账号的home路径下的.ssh/中scp username_rsa zhangsan@172.0.0.1:/home/zhangsan/.ssh# 配置公钥文件访问权限为600]]></content>
+      <categories>
+        <category>工具</category>
+      </categories>
+      <tags>
+        <tag>SSH</tag>
+      </tags>
+  </entry>
+</search>
